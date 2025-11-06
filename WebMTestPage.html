@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebM + MP4 Fallback Test</title>
+    <title>WebM + MP4 Fallback Test (Fixed)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,13 +40,24 @@
             border-radius: 4px;
             margin: 10px 0;
         }
+        .success {
+            background: #e6ffe6;
+            color: #008000;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
-    <h1>WebM + MP4 Fallback Test</h1>
-    
+    <h1>WebM + MP4 Fallback Test (Fixed Detection)</h1>
+
     <div class="info">
         <strong>Instructions:</strong> Open browser dev tools → Network tab → reload page → play videos to see which formats load.
+    </div>
+
+    <div class="success">
+        <strong>Fix Applied:</strong> Detection now uses 'loadedmetadata' and 'canplay' events instead of 'loadstart' to correctly identify which source actually plays (including fallback scenarios).
     </div>
 
     <div class="video-container">
@@ -92,10 +103,20 @@
     </div>
 
     <script>
-        // Detect which source is actually being used
+        // FIXED: Detect which source is actually being used
         function detectVideoFormat(videoElement, displayElement) {
-            videoElement.addEventListener('loadstart', function() {
-                const currentSrc = this.currentSrc;
+            // Update display when video metadata loads (after source selection)
+            videoElement.addEventListener('loadedmetadata', function() {
+                updateFormat();
+            });
+
+            // Also update on canplay for extra reliability
+            videoElement.addEventListener('canplay', function() {
+                updateFormat();
+            });
+
+            function updateFormat() {
+                const currentSrc = videoElement.currentSrc;
                 if (currentSrc.includes('.webm')) {
                     displayElement.textContent = 'WebM - ' + currentSrc.split('/').pop();
                     displayElement.style.color = '#28a745';
@@ -105,12 +126,18 @@
                 } else {
                     displayElement.textContent = 'Unknown: ' + currentSrc.split('/').pop();
                 }
-            });
+            }
 
             // Handle errors
-            videoElement.addEventListener('error', function() {
-                displayElement.textContent = 'Error loading video';
-                displayElement.style.color = '#d8000c';
+            videoElement.addEventListener('error', function(e) {
+                // Check if it's a source error (will try fallback) or video error (no fallback worked)
+                if (e.target.tagName === 'SOURCE') {
+                    displayElement.textContent = 'Source failed, trying fallback...';
+                    displayElement.style.color = '#ff9800';
+                } else {
+                    displayElement.textContent = 'Error: All sources failed';
+                    displayElement.style.color = '#d8000c';
+                }
             });
         }
 
