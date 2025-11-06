@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebM + MP4 Fallback Test (Fixed)</title>
+    <title>WebM + MP4 Fallback Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,14 +50,10 @@
     </style>
 </head>
 <body>
-    <h1>WebM + MP4 Fallback Test (Fixed Detection)</h1>
+    <h1>WebM + MP4 Fallback Test</h1>
 
     <div class="info">
         <strong>Instructions:</strong> Open browser dev tools → Network tab → reload page → play videos to see which formats load.
-    </div>
-
-    <div class="success">
-        <strong>Fix Applied:</strong> Detection now uses 'loadedmetadata' and 'canplay' events instead of 'loadstart' to correctly identify which source actually plays (including fallback scenarios).
     </div>
 
     <div class="video-container">
